@@ -121,4 +121,7 @@ def handwritingClassTest():
     print('the total error rate is : %f' % (errorCount / float(mTest)))
 
 
-handwritingClassTest()
+group, labels = createDataSet()
+classList = [example[-1] for example in group] #example[-1] 取example最后一个元素
+print(classList[0])
+print(len(classList))
