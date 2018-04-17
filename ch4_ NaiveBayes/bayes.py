@@ -1,4 +1,6 @@
 from numpy import *
+import re
+
 def loadDataSet():
     postingList = [['my', 'dog', 'has', 'flea', 'problem', 'help', 'please'],
                    ['maybe', 'not', 'take', 'him', 'to', 'dog', 'park', 'stupid'],
@@ -82,7 +84,53 @@ def testingNB():
     print(testEntry, 'classified as :', classifyNB(thisDoc, p0V, p1V, pAb))
 
 
-testingNB()
+#朴素贝叶斯词袋模型
+def bagOfWords2VecMN(vocabList, inputSet):
+    returnVec = [0] * len(vocabList)
+    for word in inputSet:
+        if word in vacabList:
+            returnVec[vocabList.index(word)] += 1
+    return returnVec
+
+
+#文件解析及完整的垃圾邮件测试函数
+def textParse(bigString):
+    listOfTokens = re.split(r'\W*', bigString)
+    return [tor.lower() for tor in listOfTokens if len(tor) > 2]
+
+#对贝叶斯垃圾邮件分类器进行自动化处理
+def spamTest():
+    docList = []; classList = [] ; fullText = []
+    for i in range(1, 26):
+        wordList = textParse(open('email/spam/%d.txt' % i).read())
+        docList.append(wordList)
+        fullText.extend(wordList)
+        classList.append(1)
+        wordList = textParse(open('email/ham/%d.txt' % i).read())
+        docList.append(wordList)
+        fullText.extend(wordList)
+        classList.append(0)
+    vocabList = createVocabList(docList)
+    trainingSet = list(range(50)); testSet = []
+    #随机构建训练集：随机选择其中10个文件
+    for i in range(10):
+        randIndex = int(random.uniform(0, len(trainingSet)))
+        testSet.append(trainingSet[randIndex])
+        del(trainingSet[randIndex])
+    trainMat = []; trainClasses = []
+    #对测试集分类
+    for docIndex in trainingSet:
+        trainMat.append(setOfWords2Vec(vocabList, docList[docIndex]))
+        trainClasses.append(classList[docIndex])
+    p0V, p1V, pSpam = trainNB0(array(trainMat), array(trainClasses))
+    errorCount = 0
+    for docIndex in testSet:
+        wordVector = setOfWords2Vec(vocabList, docList[docIndex])
+        if classifyNB(array(wordVector), p0V, p1V, pSpam) != classList[docIndex]:
+            errorCount += 1
+    print('the error rate is:',float(errorCount)/len(testSet))
+
+
 # listOPosts, listClasses = loadDataSet()
 # myVocabList = createVocabList(listOPosts)
 # #print("myVocabList....%s" % myVocabList)
@@ -97,3 +145,13 @@ testingNB()
 # print('p0V....%s ' % p0V)
 #a=[1, 2, 3];b=[4, 5, 6];a.append(b);print(a) #[1, 2, 3, [4, 5, 6]]
 #a=[1, 2, 3];a.extend(b);print(a) #[1, 2, 3, 4, 5, 6]
+
+
+# testingNB()
+# mySent = 'This book is the best book on Python or M.L. I have ever laid eyes upon.'
+# regEx = re.compile('\\W*')
+# listOfTokens = regEx.split(mySent)
+# print(listOfTokens)
+
+spamTest()
+
